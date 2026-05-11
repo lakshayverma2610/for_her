@@ -1,0 +1,1208 @@
+<!DOCTYPE html>
+<html lang="en">
+
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>For You</title>
+    <style>
+        :root {
+            --bg-color: #0f0805;
+            /* Even darker rich brown */
+            --text-primary: #e8d5c4;
+            --text-secondary: #8c735d;
+            --accent: #d4a373;
+            --accent-gold: #f2cc8f;
+            --font-heading: 'Playfair Display', serif;
+            --font-body: 'Lora', serif;
+        }
+
+        * {
+            margin: 0;
+            padding: 0;
+            box-sizing: border-box;
+        }
+
+        body {
+            background-color: var(--bg-color);
+            color: var(--text-primary);
+            font-family: var(--font-body);
+            overflow-x: hidden;
+            line-height: 1.8;
+
+            /* Make site copy-paste proof */
+            -webkit-user-select: none;
+            -ms-user-select: none;
+            user-select: none;
+        }
+
+        body::before {
+            content: '';
+            position: fixed;
+            top: 0;
+            left: 0;
+            width: 100vw;
+            height: 100vh;
+            background: radial-gradient(circle at top right, rgba(212, 163, 115, 0.08) 0%, rgba(15, 8, 5, 1) 70%);
+            z-index: -1;
+        }
+
+        .overlay {
+            position: fixed;
+            top: 0;
+            left: 0;
+            width: 100vw;
+            height: 100vh;
+            background-color: var(--bg-color);
+            display: flex;
+            flex-direction: column;
+            justify-content: center;
+            align-items: center;
+            z-index: 100;
+            transition: opacity 1.5s ease, visibility 1.5s ease;
+        }
+
+        #start-btn {
+            background: transparent;
+            border: 1px solid var(--accent);
+            color: var(--accent);
+            padding: 15px 40px;
+            font-size: 1.2rem;
+            font-family: var(--font-heading);
+            border-radius: 40px;
+            cursor: pointer;
+            transition: all 0.4s ease;
+            letter-spacing: 2px;
+        }
+
+        #start-btn:active,
+        #start-btn:hover {
+            background: var(--accent);
+            color: var(--bg-color);
+            box-shadow: 0 0 20px rgba(212, 163, 115, 0.4);
+        }
+
+        .hint {
+            margin-top: 20px;
+            font-size: 0.9rem;
+            color: var(--text-secondary);
+            opacity: 0.6;
+            font-style: italic;
+        }
+
+        .screen {
+            min-height: 100vh;
+            display: flex;
+            flex-direction: column;
+            justify-content: center;
+            padding: 2.5rem 55px 2.5rem 20px;
+            /* Added right padding so text never overlaps arrows */
+            position: relative;
+            max-width: 600px;
+            margin: 0 auto;
+        }
+
+        .hero {
+            text-align: center;
+            align-items: center;
+        }
+
+        .text-left {
+            text-align: left;
+            align-items: flex-start;
+        }
+
+        .text-right {
+            text-align: right;
+            align-items: flex-end;
+        }
+
+        .text-center {
+            text-align: center;
+            align-items: center;
+        }
+
+        .center-content {
+            align-items: center;
+        }
+
+        h1,
+        h2,
+        h3 {
+            font-family: var(--font-heading);
+            font-weight: 400;
+            margin-bottom: 1rem;
+            line-height: 1.2;
+        }
+
+        h1 {
+            font-size: 2.8rem;
+        }
+
+        h2 {
+            font-size: 2.2rem;
+            color: var(--accent);
+        }
+
+        h3 {
+            font-size: 1.8rem;
+        }
+
+        p {
+            font-size: 1.2rem;
+            margin-bottom: 1rem;
+        }
+
+        .mt-2 {
+            margin-top: 0.5rem;
+        }
+
+        .mt-4 {
+            margin-top: 1.5rem;
+        }
+
+        .mt-6 {
+            margin-top: 2.5rem;
+        }
+
+        .highlight {
+            font-family: var(--font-heading);
+            font-style: italic;
+            color: var(--accent);
+        }
+
+        .highlight-gold {
+            font-family: var(--font-heading);
+            font-style: italic;
+            color: var(--accent-gold);
+        }
+
+        .large-text {
+            font-size: 1.6rem;
+            line-height: 1.4;
+        }
+
+        .card {
+            background: rgba(255, 255, 255, 0.02);
+            border: 1px solid rgba(212, 163, 115, 0.1);
+            padding: 2.5rem 2rem;
+            border-radius: 16px;
+            backdrop-filter: blur(10px);
+            -webkit-backdrop-filter: blur(10px);
+            width: 100%;
+        }
+
+        .glow-card {
+            box-shadow: 0 10px 40px rgba(212, 163, 115, 0.05);
+        }
+
+        .dark-card {
+            background: rgba(0, 0, 0, 0.3);
+        }
+
+        /* Python Code Block Styling */
+        .code-card {
+            background: #1e1e1e;
+            border: 1px solid var(--accent);
+            box-shadow: 0 0 20px rgba(212, 163, 115, 0.15);
+            padding: 1.5rem;
+            overflow-x: hidden;
+            white-space: pre-wrap;
+            font-family: 'Courier New', Courier, monospace;
+            font-size: 0.95rem;
+            line-height: 1.5;
+            text-align: left;
+        }
+
+        .code-card pre {
+            margin: 0;
+            white-space: pre-wrap;
+            word-wrap: break-word;
+        }
+
+        .kw {
+            color: #569cd6;
+            font-weight: bold;
+        }
+
+        /* Keywords: class, def, if, return, while */
+        .cls {
+            color: #4ec9b0;
+        }
+
+        /* Class names */
+        .func {
+            color: #dcdcaa;
+        }
+
+        /* Function names */
+        .arg {
+            color: #9cdcfe;
+        }
+
+        /* Arguments */
+        .str {
+            color: #ce9178;
+        }
+
+        /* Strings */
+        .num {
+            color: #b5cea8;
+        }
+
+        /* Numbers */
+        .bool {
+            color: #569cd6;
+        }
+
+        /* Booleans */
+
+        /* --- ANIMATIONS --- */
+
+        .delay-1 {
+            transition-delay: 0.5s !important;
+        }
+
+        .delay-2 {
+            transition-delay: 1.0s !important;
+        }
+
+        .delay-3 {
+            transition-delay: 1.5s !important;
+        }
+
+        .delay-4 {
+            transition-delay: 2.0s !important;
+        }
+
+        .delay-5 {
+            transition-delay: 2.5s !important;
+        }
+
+        /* Refined Fade In Blur */
+        .fade-in-blur {
+            opacity: 0;
+            filter: blur(12px);
+            transform: translateY(15px);
+            /* Gentle float up while un-blurring */
+            transition: opacity 1.8s ease-out, filter 1.8s ease-out, transform 1.8s ease-out;
+        }
+
+        .fade-in-blur.visible {
+            opacity: 1;
+            filter: blur(0);
+            transform: translateY(0);
+        }
+
+        /* Scroll Indicator */
+        .scroll-indicator {
+            position: absolute;
+            bottom: 50px;
+            display: flex;
+            flex-direction: column;
+            align-items: center;
+            color: var(--text-secondary);
+            font-size: 0.8rem;
+            letter-spacing: 3px;
+            text-transform: uppercase;
+            left: 50%;
+            transform: translateX(-50%);
+        }
+
+        .arrow {
+            width: 1px;
+            height: 50px;
+            background: linear-gradient(transparent, var(--accent));
+            margin-top: 15px;
+            animation: scrollDrop 2s infinite;
+        }
+
+        @keyframes scrollDrop {
+            0% {
+                transform: translateY(-10px);
+                opacity: 0;
+            }
+
+            50% {
+                opacity: 1;
+            }
+
+            100% {
+                transform: translateY(20px);
+                opacity: 0;
+            }
+        }
+
+        /* Navigation Arrows */
+        .nav-controls {
+            position: fixed;
+            right: 15px;
+            top: 50%;
+            transform: translateY(-50%);
+            display: flex;
+            flex-direction: column;
+            gap: 15px;
+            z-index: 50;
+            opacity: 0;
+            pointer-events: none;
+            transition: opacity 1.5s ease;
+        }
+
+        .nav-controls.visible {
+            opacity: 1;
+            pointer-events: auto;
+        }
+
+        .nav-btn {
+            width: 35px;
+            height: 35px;
+            border-radius: 50%;
+            background: rgba(255, 255, 255, 0.03);
+            border: 1px solid rgba(212, 163, 115, 0.3);
+            color: var(--accent);
+            display: flex;
+            justify-content: center;
+            align-items: center;
+            font-size: 0.8rem;
+            cursor: default;
+            /* Removed the hand pointer */
+            backdrop-filter: blur(5px);
+            -webkit-backdrop-filter: blur(5px);
+            transition: all 0.3s ease;
+        }
+
+        .nav-btn:hover,
+        .nav-btn:active {
+            background: rgba(212, 163, 115, 0.15);
+            border-color: var(--accent);
+            box-shadow: 0 0 10px rgba(212, 163, 115, 0.4);
+        }
+
+        /* --- IPOD CLASSIC GEOMETRY --- */
+        .ipod {
+            width: 220px;
+            height: 350px;
+            background: linear-gradient(135deg, #2a2a2a, #111);
+            border: 2px solid #444;
+            border-radius: 15px;
+            margin: 0 auto;
+            padding: 15px;
+            box-shadow: inset -2px -2px 10px rgba(0, 0, 0, 0.8), 0 10px 30px rgba(0, 0, 0, 0.6);
+            display: flex;
+            flex-direction: column;
+            align-items: center;
+            position: relative;
+        }
+
+        .ipod::after {
+            content: '';
+            position: absolute;
+            top: 5px;
+            right: 5px;
+            left: 5px;
+            bottom: 5px;
+            border-radius: 12px;
+            border: 1px solid rgba(255, 255, 255, 0.05);
+            pointer-events: none;
+        }
+
+        .ipod-screen {
+            width: 100%;
+            height: 130px;
+            background: #e0ecef;
+            border: 4px solid #000;
+            border-radius: 5px;
+            margin-bottom: 30px;
+            color: #111;
+            font-family: sans-serif;
+            display: flex;
+            flex-direction: column;
+            justify-content: flex-start;
+            align-items: flex-start;
+            box-shadow: inset 0 0 15px rgba(0, 0, 0, 0.2);
+            overflow: hidden;
+            position: relative;
+        }
+
+        .ipod-header {
+            background: linear-gradient(to bottom, #fff, #bbb);
+            width: 100%;
+            text-align: center;
+            border-bottom: 1px solid #888;
+            font-weight: bold;
+            font-size: 0.75rem;
+            padding: 2px 0;
+            color: #000;
+            box-shadow: 0 1px 2px rgba(0, 0, 0, 0.1);
+        }
+
+        .ipod-list {
+            list-style: none;
+            width: 100%;
+            height: calc(100% - 20px);
+            margin: 0;
+            padding: 0;
+            overflow-y: auto;
+            -ms-overflow-style: none;
+            scrollbar-width: none;
+        }
+
+        .ipod-list::-webkit-scrollbar {
+            display: none;
+        }
+
+        .ipod-list li {
+            padding: 2px 5px;
+            font-size: 0.8rem;
+            color: #000;
+            display: flex;
+            justify-content: space-between;
+            font-weight: bold;
+            white-space: nowrap;
+        }
+
+        .ipod-list li span:first-child {
+            overflow: hidden;
+            text-overflow: ellipsis;
+            max-width: 90%;
+        }
+
+        .ipod-list li.selected {
+            background: linear-gradient(to bottom, #5b9dd9, #1b68b3);
+            color: #fff;
+        }
+
+        .ipod-content-box {
+            width: 100%;
+            height: 100%;
+            display: flex;
+            flex-direction: column;
+            justify-content: center;
+            align-items: center;
+            padding: 5px;
+            text-align: center;
+        }
+
+        .ipod-content-box p {
+            font-size: 0.75rem;
+            margin: 2px 0;
+            color: #333;
+            font-weight: bold;
+        }
+
+        .ipod-content-box h4 {
+            font-size: 1rem;
+            margin: 5px 0;
+            text-align: center;
+            line-height: 1.2;
+            color: #000;
+        }
+
+        .ipod-wheel {
+            width: 130px;
+            height: 130px;
+            background: #181818;
+            border-radius: 50%;
+            position: relative;
+            display: flex;
+            justify-content: center;
+            align-items: center;
+            box-shadow: 0 2px 5px rgba(0, 0, 0, 0.8), inset 0 2px 5px rgba(255, 255, 255, 0.1);
+        }
+
+        .ipod-center {
+            width: 50px;
+            height: 50px;
+            background: #222;
+            border-radius: 50%;
+            box-shadow: inset 0 2px 5px rgba(0, 0, 0, 0.8), 0 1px 2px rgba(255, 255, 255, 0.1);
+        }
+
+        .wheel-text {
+            position: absolute;
+            font-size: 0.65rem;
+            color: #888;
+            font-family: sans-serif;
+            font-weight: bold;
+            letter-spacing: 1px;
+            padding: 10px;
+            /* Increase hit area for easier clicking on mobile */
+            cursor: pointer;
+            /* Change to pointer to indicate clickability */
+            z-index: 10;
+        }
+
+        .wheel-text:active {
+            color: #ccc;
+        }
+
+        .wheel-text.top {
+            top: 2px;
+        }
+
+        .wheel-text.bottom {
+            bottom: 2px;
+        }
+
+        .wheel-text.left {
+            left: 2px;
+        }
+
+        .wheel-text.right {
+            right: 2px;
+        }
+
+        @media (max-width: 768px) {
+            .nav-controls {
+                display: none !important;
+            }
+
+            .screen {
+                padding: 2.5rem 20px !important;
+            }
+        }
+    </style>
+    <link
+        href="https://fonts.googleapis.com/css2?family=Playfair+Display:ital,wght@0,400;0,700;1,400&family=Lora:ital,wght@0,400;0,500;1,400&display=swap"
+        rel="stylesheet">
+</head>
+
+<body>
+    <div id="start-overlay" class="overlay">
+        <button id="start-btn">Tap to begin</button>
+        <p class="hint">Please turn your volume up slightly</p>
+    </div>
+
+    <!-- Navigation Arrows -->
+    <div class="nav-controls" id="nav-controls">
+        <div class="nav-btn" id="btn-up">&#9650;</div>
+        <div class="nav-btn" id="btn-down">&#9660;</div>
+    </div>
+
+    <!-- AUDIO ELEMENT -->
+    <audio id="bgm">
+        <source src="songs/Till The End.mp3" type="audio/mpeg">
+    </audio>
+
+    <div class="scroll-container">
+
+        <!-- Section 1: The Beginning -->
+        <section class="screen hero" id="sec-1">
+            <h1 class="fade-in-blur">From a random Omegle chat...</h1>
+            <p class="fade-in-blur delay-1">to the best thing that ever happened to me.</p>
+            <div class="scroll-indicator fade-in-blur delay-2">
+                <span>Scroll softly</span>
+                <div class="arrow"></div>
+            </div>
+        </section>
+
+        <!-- Section 2: The Connection -->
+        <section class="screen text-left" id="sec-2">
+            <p class="fade-in-blur">It’s crazy how we were both so alone before that day.</p>
+            <p class="fade-in-blur delay-1 mt-4">Within an hour of talking, I think we both knew this was going to be
+                something special.</p>
+            <p class="fade-in-blur delay-2 highlight mt-6">And every time you tell me my pictures make you melt... I
+                realize how deeply I've fallen for you.</p>
+        </section>
+
+        <!-- Section 3: The Contrast & Apology -->
+        <section class="screen center-content" id="sec-3">
+            <div class="card glow-card">
+                <p class="fade-in-blur">You remember every tiny detail I tell you.</p>
+                <p class="fade-in-blur delay-1 mt-2">Even when you're exhausted. Even when your internship makes you far
+                    busier than I am.</p>
+                <p class="fade-in-blur delay-2 mt-4">And I know I mess up. I forget things you say. I excitedly tell you
+                    about the food at home, forgetting that you're stuck eating terrible mess food and missing your
+                    family.</p>
+                <p class="fade-in-blur delay-3 highlight-text mt-4">I'm sorry for being careless. I see your patience,
+                    and I appreciate it more than you know.</p>
+            </div>
+        </section>
+
+        <!-- Section 4: The Effort -->
+        <section class="screen text-right" id="sec-4">
+            <h2 class="fade-in-blur">I see it all.</h2>
+            <p class="fade-in-blur delay-1 mt-2">I know things get tight by the 11th. I know the long shifts drain you.
+            </p>
+            <p class="fade-in-blur delay-2 mt-2">But you still woke up today, got ready just to meet me, drop me off,
+                and have that same 320rs coffee we loved.</p>
+            <p class="fade-in-blur delay-3 highlight mt-4">Your loyalty and effort are unmatched. You make my chaos feel
+                calm.</p>
+        </section>
+
+        <!-- Section 5: The Intimacy -->
+        <section class="screen center-content" id="sec-5">
+            <div class="card dark-card">
+                <h2 class="fade-in-blur">Our Taxi Rides.</h2>
+                <p class="fade-in-blur delay-1 mt-2">From that gentle forehead kiss on our first date...</p>
+                <p class="fade-in-blur delay-2 mt-2">To things getting wilder every time we meet.</p>
+                <p class="fade-in-blur delay-3 mt-4">Today, I didn't fail your challenge because I couldn't control
+                    myself.</p>
+                <p class="fade-in-blur delay-4 mt-2">I failed it because I realized: why waste a beautiful moment you
+                    spent so much effort to create?</p>
+            </div>
+        </section>
+
+        <!-- Section 6: The Python Promise -->
+        <section class="screen center-content" id="sec-6">
+            <h2 class="fade-in-blur">My Code of Conduct</h2>
+            <div class="card dark-card code-card fade-in-blur delay-1">
+                <pre><code>
+<span class="kw">class</span> <span class="cls">TheManYouDeserve</span>:
+    <span class="kw">def</span> <span class="func">__init__</span>(<span class="arg">self</span>):
+        <span class="arg">self</span>.maturity = <span class="bool">True</span>
+        <span class="arg">self</span>.excuses = <span class="num">0</span>
+        <span class="arg">self</span>.effort = <span class="str">"Infinite"</span>
+
+    <span class="kw">def</span> <span class="func">handle_exhaustion</span>(<span class="arg">self</span>, <span class="arg">your_state</span>):
+        <span class="kw">if</span> <span class="arg">your_state</span> == <span class="str">"misses_home"</span> <span class="kw">or</span> <span class="arg">your_state</span> == <span class="str">"tired_intern"</span>:
+            <span class="arg">self</span>.ensure_you_get_your_sleep()
+            <span class="kw">return</span> <span class="str">"Go to sleep. I will be your peace, not another problem."</span>
+            
+    <span class="kw">def</span> <span class="func">execute_promise</span>(<span class="arg">self</span>):
+        <span class="kw">while</span> <span class="bool">True</span>:
+            <span class="arg">self</span>.build_future()
+            <span class="arg">self</span>.protect(you)
+                </code></pre>
+            </div>
+            <p class="fade-in-blur delay-2 mt-6 text-center highlight" style="font-size: 1.1rem;">No more being "too
+                available" to the point of distraction. Just focused, mature effort for us.</p>
+        </section>
+
+        <!-- Section 7: The Promise -->
+        <section class="screen text-center" id="sec-7">
+            <h2 class="fade-in-blur">My Promise</h2>
+            <p class="fade-in-blur delay-1 mt-2">I am building myself. The exams, the Android games plan, the
+                papers...</p>
+            <p class="fade-in-blur delay-2 mt-2">I'm doing it all with a purpose.</p>
+            <h3 class="fade-in-blur delay-3 highlight large-text mt-6">So that one day, you won't have to stress about
+                the first day of the month for salary.</h3>
+            <p class="fade-in-blur delay-4 mt-4">I will become the man you can rely on. Not someone you have to carry.
+            </p>
+        </section>
+
+        <!-- Section 8: The Playlist / iPod -->
+        <section class="screen center-content" id="sec-8">
+            <h2 class="fade-in-blur">Plug in your earphones.</h2>
+            <p class="fade-in-blur delay-1 mb-4 text-center">Listen to this playlist whenever you miss me, or when you
+                just need a good sleep.</p>
+
+            <div class="ipod fade-in-blur delay-2 mt-6">
+                <div class="ipod-screen" id="ipod-display">
+                    <!-- Rendered via JS -->
+                </div>
+                <div class="ipod-wheel">
+                    <div class="ipod-center" id="ipod-center"></div>
+                    <span class="wheel-text top" id="ipod-menu">MENU</span>
+                    <span class="wheel-text left" id="ipod-prev">|&lt;&lt;</span>
+                    <span class="wheel-text right" id="ipod-next">&gt;&gt;|</span>
+                    <span class="wheel-text bottom" id="ipod-play">&gt;||</span>
+                </div>
+            </div>
+        </section>
+
+        <!-- Section 9: Ending -->
+        <section class="screen hero" id="sec-9">
+            <h1 class="fade-in-blur">Thank you for being my peace.</h1>
+            <p class="fade-in-blur delay-1 mt-6" style="font-style: italic; font-size: 1.5rem;">I love you.</p>
+        </section>
+
+    </div>
+
+    <script>
+        const SONGS_LIST = [
+            { title: "Mera Pyar Woh Hai", filename: "Mera Pyar Woh Hai.mp3", category: "Old" },
+            { title: "Ae Sanam Jisne Tujhe", filename: "Ae Sanam Jisne Tujhe.mp3", category: "Old" },
+            { title: "Chura Liya Hai Tumne Jo Dil Ko", filename: "Chura Liya Hai Tumne Jo Dil Ko.mp3", category: "Old" },
+            { title: "Her", filename: "Her.mp3", category: "New" },
+            { title: "Khuda Jaane", filename: "Khuda Jaane.mp3", category: "New" },
+            { title: "Pal Pal Dil Ke Paas", filename: "Pal Pal Dil Ke Paas.mp3", category: "Old" },
+            { title: "Tu Jaane Na", filename: "Tu Jaane Na.mp3", category: "Old" },
+            { title: "California Love", filename: "California Love.mp3", category: "New" },
+            { title: "Confess Your Love", filename: "Confess Your Love.mp3", category: "New" },
+            { title: "Dard Dilo Ke", filename: "Dard Dilo Ke.mp3", category: "New" },
+            { title: "Dheere Dheere", filename: "Dheere Dheere.mp3", category: "New" },
+            { title: "Dil Diyan Gallan", filename: "Dil Diyan Gallan.mp3", category: "New" },
+            { title: "Dil To Bachcha Hai", filename: "Dil To Bachcha Hai.mp3", category: "New" },
+            { title: "Dil Tu Jaan Tu", filename: "Dil Tu Jaan Tu.mp3", category: "New" },
+            { title: "Dilawara", filename: "Dilawara.mp3", category: "New" },
+            { title: "Hale Dil", filename: "Hale Dil.mp3", category: "New" },
+            { title: "Humnava Mere", filename: "Humnava Mere.mp3", category: "New" },
+            { title: "I Love You", filename: "I Love You.mp3", category: "New" },
+            { title: "I Think They Call This Love", filename: "I Think They Call This Love.mp3", category: "New" },
+            { title: "Jab Tak", filename: "Jab Tak.mp3", category: "New" },
+            { title: "Ishq Bulaava", filename: "Ishq Bulaava.mp3", category: "New" },
+            { title: "Ishq Sufiyana", filename: "Ishq Sufiyana.mp3", category: "New" },
+            { title: "Ishq Wala Love", filename: "Ishq Wala Love.mp3", category: "New" },
+            { title: "Ishqa Ve", filename: "Ishqa Ve.mp3", category: "New" },
+            { title: "Jaane Na Tu", filename: "Jaane Na Tu.mp3", category: "New" },
+            { title: "Jiyein Kyun", filename: "Jiyein Kyun.mp3", category: "New" },
+            { title: "Khairiyat", filename: "Khairiyat.mp3", category: "New" },
+            { title: "Kya Mujhe Pyaar Hai", filename: "Kya Mujhe Pyaar Hai.mp3", category: "Old" },
+            { title: "Lae Dooba", filename: "Lae Dooba.mp3", category: "New" },
+            { title: "Let Me Love You", filename: "Let Me Love You.mp3", category: "New" },
+            { title: "Love Ya", filename: "Love Ya.mp3", category: "New" },
+            { title: "Lover", filename: "Lover.mp3", category: "New" },
+            { title: "Muskurane", filename: "Muskurane.mp3", category: "New" },
+            { title: "Nain Ta Heere ", filename: "Nain Ta Heere.mp3", category: "New" },
+            { title: "Naina", filename: "Naina.mp3", category: "New" },
+            { title: "One Kiss", filename: "One Kiss.mp3", category: "New" },
+            { title: "One Love", filename: "One Love.mp3", category: "New" },
+            { title: "Phir Mohabbat", filename: "Phir Mohabbat.mp3", category: "New" },
+            { title: "Sanam Teri Kasam", filename: "Sanam Teri Kasam.mp3", category: "New" },
+            { title: "Show Me Love", filename: "Show Me Love.mp3", category: "New" },
+            { title: "Soni Soni", filename: "Soni Soni.mp3", category: "New" },
+            { title: "Till The End", filename: "Till The End.mp3", category: "New" },
+            { title: "Together", filename: "Together.mp3", category: "New" },
+            { title: "Tum Ho", filename: "Tum Ho.mp3", category: "New" },
+            { title: "Wajah Tum Ho", filename: "Wajah Tum Ho.mp3", category: "New" },
+            { title: "love nwantiti", filename: "love nwantiti.mp3", category: "New" }
+        ];
+    </script>
+    <script>
+        // Prevent browser from restoring scroll position on reload
+        if ('scrollRestoration' in history) {
+            history.scrollRestoration = 'manual';
+        }
+
+        document.addEventListener('DOMContentLoaded', () => {
+            window.scrollTo(0, 0); // Force scroll to top
+            const startBtn = document.getElementById('start-btn');
+            const overlay = document.getElementById('start-overlay');
+            const audio = document.getElementById('bgm');
+
+            // Prevent Right-Click and Copy
+            document.addEventListener('contextmenu', event => event.preventDefault());
+            document.addEventListener('copy', event => event.preventDefault());
+
+            // Intersection Observer
+            const animatedElements = document.querySelectorAll('.fade-in-blur');
+            const observer = new IntersectionObserver((entries) => {
+                entries.forEach(entry => {
+                    if (entry.isIntersecting) entry.target.classList.add('visible');
+                });
+            }, { threshold: 0.3 });
+
+            // Navigation Logic
+            const navControls = document.getElementById('nav-controls');
+            const btnUp = document.getElementById('btn-up');
+            const btnDown = document.getElementById('btn-down');
+            const allSections = document.querySelectorAll('.screen');
+            const totalSections = allSections.length;
+            let currentSection = 1;
+
+            const scrollToSection = (index) => {
+                if (index < 1 || index > totalSections) return;
+                currentSection = index;
+                const target = document.getElementById(`sec-${currentSection}`);
+                if (target) target.scrollIntoView({ behavior: 'smooth' });
+            };
+
+            btnUp.addEventListener('click', () => scrollToSection(currentSection - 1));
+            btnDown.addEventListener('click', () => scrollToSection(currentSection + 1));
+
+            const sectionObserver = new IntersectionObserver((entries) => {
+                entries.forEach(entry => {
+                    if (entry.isIntersecting) currentSection = parseInt(entry.target.id.split('-')[1]);
+                });
+            }, { rootMargin: '-50% 0px -50% 0px' });
+
+            allSections.forEach(sec => sectionObserver.observe(sec));
+
+            // --- IPOD CLASSIC LOGIC ---
+            const ipodDisplay = document.getElementById('ipod-display');
+            const ipodMenuBtn = document.getElementById('ipod-menu');
+            const ipodCenterBtn = document.getElementById('ipod-center');
+            const ipodPlayBtn = document.getElementById('ipod-play');
+            const ipodPrevBtn = document.getElementById('ipod-prev');
+            const ipodNextBtn = document.getElementById('ipod-next');
+            const ipodWheel = document.querySelector('.ipod-wheel');
+
+            // Menu Data Structure
+            /* 
+               HOW TO ADD SONGS: 
+               Just add a new object to the "Songs" array below. 
+               Format: { label: "Song Name", type: "song", src: "filename.mp3" }
+            */
+            // Dynamically build the songs lists from SONGS_LIST (defined in songs.js)
+            const oldSongs = [];
+            const newSongs = [];
+            if (typeof SONGS_LIST !== 'undefined') {
+                SONGS_LIST.forEach(song => {
+                    const item = { label: song.title, type: "song", src: "songs/" + song.filename };
+                    if (song.category === "Old") oldSongs.push(item);
+                    else newSongs.push(item);
+                });
+            } else {
+                // Fallback
+                oldSongs.push({ label: "Till The End", type: "song", src: "songs/Till The End.mp3" });
+            }
+
+            const ipodData = {
+                title: "iPod",
+                items: [
+                    {
+                        label: "All Songs", type: "menu", value: {
+                            title: "All Songs",
+                            items: [
+                                {
+                                    label: "Old Songs", type: "menu", value: {
+                                        title: "Old Songs",
+                                        items: oldSongs
+                                    }
+                                },
+                                {
+                                    label: "New Songs", type: "menu", value: {
+                                        title: "New Songs",
+                                        items: newSongs
+                                    }
+                                }
+                            ]
+                        }
+                    },
+                    {
+                        label: "Where it started", type: "menu", value: {
+                            title: "Where it started",
+                            items: [
+                                { label: "First Text", type: "text", value: { her: "hi", him: "yo sup", date: "Apr 7, 8:45 PM" } },
+                                { label: "Time Together", type: "timer" }
+                            ]
+                        }
+                    },
+                    { label: "Now Playing", type: "now_playing" }
+                ]
+            };
+
+            let menuStack = [];
+            let currentMenu = ipodData;
+            let selectedIndex = 0;
+
+            let isPlaying = false;
+            let currentSongName = "Till The End";
+            let currentSongSrc = "songs/Till The End.mp3";
+            let currentSongCover = "covers/Till The End.jpg";
+            let currentQueue = ipodData.items[0].value.items[0].value.items;
+            let timerInterval = null;
+
+            const playSong = (songItem) => {
+                audio.src = songItem.src;
+                currentSongName = songItem.label;
+                currentSongSrc = songItem.src;
+                currentSongCover = ""; // Reset cover
+                audio.play();
+                isPlaying = true;
+                renderIpod();
+
+                // Load cover art directly from the covers folder
+                const coverFileName = songItem.src.split('/').pop().replace('.mp3', '.jpg');
+                currentSongCover = "covers/" + coverFileName;
+                renderIpod();
+            };
+
+            const renderIpod = () => {
+                clearInterval(timerInterval);
+
+                // Render a menu list
+                if (currentMenu.items) {
+                    let html = `<div class="ipod-header" style="cursor:pointer" title="Click to go back">${currentMenu.title}</div><ul class="ipod-list" id="ipod-list">`;
+                    currentMenu.items.forEach((item, index) => {
+                        const isSelected = index === selectedIndex ? 'class="selected"' : '';
+                        const arrow = item.type === "menu" ? "&gt;" : "";
+                        html += `<li ${isSelected} style="cursor:pointer"><span>${item.label}</span><span>${arrow}</span></li>`;
+                    });
+                    html += `</ul>`;
+                    ipodDisplay.innerHTML = html;
+
+                    // Ensure the selected item is visible
+                    const listEl = document.getElementById('ipod-list');
+                    if (listEl) {
+                        const selectedEl = listEl.querySelector('.selected');
+                        if (selectedEl) {
+                            setTimeout(() => selectedEl.scrollIntoView({ block: 'nearest' }), 0);
+                        }
+                    }
+                }
+                // Render a song/now playing screen
+                else if (currentMenu.type === "now_playing" || currentMenu.type === "song") {
+                    ipodDisplay.innerHTML = `
+                <div class="ipod-header" style="cursor:pointer; display:flex; justify-content:space-between; align-items:center; padding: 2px 5px;" title="Click to go back">
+                    <svg width="12" height="12" viewBox="0 0 24 24" fill="#1DB954"><path d="M12 0C5.4 0 0 5.4 0 12s5.4 12 12 12 12-5.4 12-12S18.66 0 12 0zm5.521 17.34c-.24.359-.66.48-1.021.24-2.82-1.74-6.36-2.101-10.561-1.141-.418.122-.779-.179-.899-.539-.12-.421.18-.78.54-.9 4.56-1.021 8.52-.6 11.64 1.32.42.18.54.659.301 1.02zm1.44-3.3c-.301.42-.84.6-1.262.3-3.239-1.98-8.159-2.58-11.939-1.38-.479.12-1.02-.12-1.14-.6-.12-.48.12-1.021.6-1.141C9.6 9.9 15 10.561 18.72 12.84c.361.181.54.78.241 1.2zm.12-3.36C15.24 8.4 8.82 8.16 5.16 9.301c-.6.179-1.2-.181-1.38-.721-.18-.6.18-1.2.72-1.38 4.26-1.26 11.28-1.02 15.721 1.621.539.3.719 1.02.419 1.56-.299.421-1.02.539-1.56.299z"/></svg>
+                    <span>Now Playing</span>
+                    <span style="width:12px;"></span>
+                </div>
+                <div class="ipod-content-box" style="padding: 2px 10px; height: calc(100% - 22px); justify-content: space-evenly;">
+                    <div style="display: flex; gap: 10px; width: 100%; align-items: center;">
+                        <img src="${currentSongCover || ''}" style="width: 32px; height: 32px; border-radius: 4px; object-fit: cover; background: #222;" onerror="this.src='data:image/svg+xml;utf8,<svg xmlns=\\\'http://www.w3.org/2000/svg\\\' width=\\\'32\\\' height=\\\'32\\\'><rect width=\\\'32\\\' height=\\\'32\\\' fill=\\\'#ccc\\\'/><text x=\\\'50%\\\' y=\\\'50%\\\' fill=\\\'#555\\\' font-size=\\\'10\\\' text-anchor=\\\'middle\\\' dy=\\\'.3em\\\'>♪</text></svg>'">
+                        <h4 style="font-size:0.8rem; margin:0; width:100%; white-space:nowrap; overflow:hidden; text-overflow:ellipsis; text-align: left;">${currentSongName}</h4>
+                    </div>
+                    <div style="width: 100%;">
+                        <div id="progress-container" style="width: 100%; height: 5px; background: #ccc; border-radius: 3px; position: relative; cursor: pointer;">
+                            <div id="progress-bar" style="width: 0%; height: 100%; background: #1DB954; border-radius: 3px; pointer-events: none;"></div>
+                        </div>
+                        <div style="width: 100%; display: flex; justify-content: space-between; font-size: 0.55rem; color: #555; margin-top: 2px;">
+                            <span id="current-time">0:00</span>
+                            <span id="total-time">0:00</span>
+                        </div>
+                    </div>
+                    <div style="display: flex; gap: 20px; align-items: center;">
+                        <span id="on-screen-prev" style="cursor: pointer; font-size: 1rem; color: #333;">⏮</span>
+                        <span id="on-screen-play" style="cursor: pointer; font-size: 1.2rem; color: #1DB954;">${isPlaying ? "⏸" : "▶"}</span>
+                        <span id="on-screen-next" style="cursor: pointer; font-size: 1rem; color: #333;">⏭</span>
+                    </div>
+                </div>
+            `;
+                }
+                // Render texts
+                else if (currentMenu.type === "text") {
+                    ipodDisplay.innerHTML = `
+                <div class="ipod-header" style="cursor:pointer" title="Click to go back">${currentMenu.value.date}</div>
+                <div class="ipod-content-box" style="align-items: flex-start; padding-left: 10px;">
+                    <p style="color:#000;"><b>Her:</b> ${currentMenu.value.her}</p>
+                    <p style="color:#444;"><b>Him:</b> ${currentMenu.value.him}</p>
+                </div>
+            `;
+                }
+                // Render timer
+                else if (currentMenu.type === "timer") {
+                    const start = new Date(2026, 3, 7, 20, 45, 0).getTime();
+                    const updateTimer = () => {
+                        const now = new Date().getTime();
+                        const diff = now - start;
+                        const d = Math.floor(diff / (1000 * 60 * 60 * 24));
+                        const h = Math.floor((diff % (1000 * 60 * 60 * 24)) / (1000 * 60 * 60));
+                        const m = Math.floor((diff % (1000 * 60 * 60)) / (1000 * 60));
+                        const s = Math.floor((diff % (1000 * 60)) / 1000);
+                        if (ipodDisplay) {
+                            ipodDisplay.innerHTML = `
+                        <div class="ipod-header" style="cursor:pointer" title="Click to go back">Time Together</div>
+                        <div class="ipod-content-box">
+                            <h4 style="font-size: 0.9rem;">${d}d ${h}h ${m}m ${s}s</h4>
+                            <p>Since "hi"</p>
+                        </div>
+                    `;
+                        }
+                    };
+                    updateTimer();
+                    timerInterval = setInterval(updateTimer, 1000);
+                }
+            };
+
+            // Wheel Scroll Logic (The classic sliding effect)
+            let isDragging = false;
+            let lastAngle = 0;
+
+            const getAngle = (e) => {
+                const rect = ipodWheel.getBoundingClientRect();
+                const centerX = rect.left + rect.width / 2;
+                const centerY = rect.top + rect.height / 2;
+                const clientX = e.touches ? e.touches[0].clientX : e.clientX;
+                const clientY = e.touches ? e.touches[0].clientY : e.clientY;
+                return Math.atan2(clientY - centerY, clientX - centerX) * (180 / Math.PI);
+            };
+
+            const startDrag = (e) => {
+                if (e.target === ipodCenterBtn || e.target.classList.contains('wheel-text')) return;
+                isDragging = true;
+                lastAngle = getAngle(e);
+                e.preventDefault();
+            };
+
+            const stopDrag = () => { isDragging = false; };
+
+            const handleDrag = (e) => {
+                if (!isDragging || !currentMenu.items) return;
+                const angle = getAngle(e);
+                let diff = angle - lastAngle;
+
+                if (diff > 180) diff -= 360;
+                if (diff < -180) diff += 360;
+
+                // Threshold: moving 15 degrees changes the selection
+                if (Math.abs(diff) > 15) {
+                    if (diff > 0) {
+                        // Scroll down
+                        selectedIndex = Math.min(selectedIndex + 1, currentMenu.items.length - 1);
+                    } else {
+                        // Scroll up
+                        selectedIndex = Math.max(selectedIndex - 1, 0);
+                    }
+                    lastAngle = angle;
+                    renderIpod();
+                }
+            };
+
+            ipodWheel.addEventListener('mousedown', startDrag);
+            window.addEventListener('mouseup', stopDrag);
+            window.addEventListener('mousemove', handleDrag);
+
+            ipodWheel.addEventListener('touchstart', startDrag, { passive: false });
+            window.addEventListener('touchend', stopDrag);
+            window.addEventListener('touchmove', handleDrag, { passive: false });
+
+            // Button Clicks
+            ipodMenuBtn.addEventListener('click', () => {
+                if (menuStack.length > 0) {
+                    currentMenu = menuStack.pop();
+                    selectedIndex = 0;
+                    renderIpod();
+                }
+            });
+
+            ipodCenterBtn.addEventListener('click', () => {
+                if (currentMenu.items) {
+                    const selected = currentMenu.items[selectedIndex];
+                    if (selected.type === "menu") {
+                        menuStack.push(currentMenu);
+                        currentMenu = selected.value;
+                        selectedIndex = 0;
+                    } else if (selected.type === "song") {
+                        // Change song
+                        currentQueue = currentMenu.items.filter(i => i.type === "song");
+                        playSong(selected);
+                        menuStack.push(currentMenu);
+                        currentMenu = { type: "now_playing" };
+                    } else {
+                        menuStack.push(currentMenu);
+                        currentMenu = selected;
+                    }
+                    renderIpod();
+                }
+            });
+
+            ipodPlayBtn.addEventListener('click', () => {
+                if (isPlaying) { audio.pause(); isPlaying = false; }
+                else { audio.play(); isPlaying = true; }
+                // If we are on the now playing screen, re-render to update text
+                if (currentMenu.type === "now_playing") renderIpod();
+            });
+
+            ipodPrevBtn.addEventListener('click', () => {
+                if (currentMenu.items) {
+                    selectedIndex = Math.max(selectedIndex - 1, 0);
+                    renderIpod();
+                }
+            });
+
+            ipodNextBtn.addEventListener('click', () => {
+                if (currentMenu.items) {
+                    selectedIndex = Math.min(selectedIndex + 1, currentMenu.items.length - 1);
+                    renderIpod();
+                }
+            });
+
+            // Screen Touch Logic
+            ipodDisplay.addEventListener('click', (e) => {
+                const li = e.target.closest('li');
+                if (li) {
+                    const index = Array.from(li.parentNode.children).indexOf(li);
+                    if (index !== -1) {
+                        selectedIndex = index;
+                        ipodCenterBtn.click();
+                    }
+                }
+
+                const header = e.target.closest('.ipod-header');
+                if (header && menuStack.length > 0) {
+                    ipodMenuBtn.click();
+                }
+
+                // Controls Logic
+                if (e.target.closest('#on-screen-play')) {
+                    ipodPlayBtn.click();
+                }
+
+                if (e.target.closest('#on-screen-prev')) {
+                    if (currentQueue && currentQueue.length > 0) {
+                        const currentIndex = currentQueue.findIndex(s => s.src === currentSongSrc);
+                        if (currentIndex > 0) {
+                            playSong(currentQueue[currentIndex - 1]);
+                        }
+                    }
+                }
+
+                if (e.target.closest('#on-screen-next')) {
+                    if (currentQueue && currentQueue.length > 0) {
+                        const currentIndex = currentQueue.findIndex(s => s.src === currentSongSrc);
+                        if (currentIndex !== -1 && currentIndex < currentQueue.length - 1) {
+                            playSong(currentQueue[currentIndex + 1]);
+                        }
+                    }
+                }
+
+                // Slider Logic
+                const progressContainer = e.target.closest('#progress-container');
+                if (progressContainer && audio.duration) {
+                    const rect = progressContainer.getBoundingClientRect();
+                    const clickX = e.clientX - rect.left;
+                    const percent = clickX / rect.width;
+                    audio.currentTime = percent * audio.duration;
+                }
+            });
+
+            // Audio Queue Logic
+            audio.addEventListener('ended', () => {
+                if (currentQueue && currentQueue.length > 0) {
+                    const currentIndex = currentQueue.findIndex(s => s.src === currentSongSrc);
+                    if (currentIndex !== -1 && currentIndex < currentQueue.length - 1) {
+                        playSong(currentQueue[currentIndex + 1]);
+                    } else {
+                        isPlaying = false;
+                        renderIpod();
+                    }
+                }
+            });
+
+            audio.addEventListener('timeupdate', () => {
+                const progressBar = document.getElementById('progress-bar');
+                const currentTimeEl = document.getElementById('current-time');
+                const totalTimeEl = document.getElementById('total-time');
+
+                if (progressBar && audio.duration) {
+                    const percent = (audio.currentTime / audio.duration) * 100;
+                    progressBar.style.width = percent + '%';
+
+                    const formatTime = (time) => {
+                        const min = Math.floor(time / 60);
+                        const sec = Math.floor(time % 60);
+                        return `${min}:${sec < 10 ? '0' : ''}${sec}`;
+                    };
+
+                    currentTimeEl.innerText = formatTime(audio.currentTime);
+                    totalTimeEl.innerText = formatTime(audio.duration);
+                }
+            });
+
+            renderIpod();
+
+            // Start App logic
+            startBtn.addEventListener('click', () => {
+                window.scrollTo({ top: 0, behavior: 'smooth' }); // Scroll to top when beginning
+                audio.volume = 0;
+                audio.play().then(() => {
+                    isPlaying = true;
+                    renderIpod(); // Update ipod to show playing
+                    let vol = 0;
+                    const fadeInterval = setInterval(() => {
+                        if (vol < 0.3) {
+                            vol += 0.01;
+                            audio.volume = vol;
+                        } else {
+                            clearInterval(fadeInterval);
+                        }
+                    }, 400);
+                }).catch(err => {
+                    console.log("Audio play failed:", err);
+                });
+
+                overlay.style.opacity = '0';
+                setTimeout(() => {
+                    overlay.style.visibility = 'hidden';
+                    navControls.classList.add('visible');
+                    animatedElements.forEach(el => observer.observe(el));
+                }, 1500);
+            });
+        });
+    </script>
+</body>
+
+</html>
